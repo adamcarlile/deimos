@@ -1,27 +1,50 @@
+require 'rack'
 require 'huyegger'
 require 'sinatra'
 require 'sinatra/contrib'
+require "sinatra/json"
 require 'webrick'
 require 'logger'
+require 'webrick'
+require 'concurrent-ruby'
 
 require "deimos/version"
 
 require 'deimos/logger'
-require 'deimos/manager'
+require 'deimos/status/runner'
+require 'deimos/status/manager'
+require 'deimos/metrics/manager'
 
 module Deimos
   module_function
 
   def boot!
-    require 'deimos/status'
-    Thread.new { Deimos::Status.run! }
+    require 'deimos/endpoints/status'
+    require 'deimos/endpoints/metrics'
+    Thread.new do 
+      ::Rack::Handler::WEBrick.run(application, {
+        BindAddress: Deimos.config.bind,
+        Port: Deimos.config.port,
+        Logger: Deimos.logger,
+        AccessLog: []
+      })
+    end
+  end
+
+  def application
+    Rack::Builder.new do
+      Deimos.middleware.each { |m| use m }
+      run Rack::URLMap.new(Deimos.applications)
+    end
   end
 
   def config
     @config ||= OpenStruct.new.tap do |x|
-      x.log_level = ENV.fetch("LOG_LEVEL", ::Logger::INFO)
-      x.port      = ENV.fetch("PORT", 5000)
-      x.bind      = ENV.fetch("BIND_IP", "0.0.0.0")
+      x.log_level    = ENV.fetch("LOG_LEVEL", ::Logger::INFO)
+      x.port         = ENV.fetch("PORT", 5000)
+      x.bind         = ENV.fetch("BIND_IP", "0.0.0.0")
+      x.applications = {}
+      x.middleware   = []
     end
   end
 
@@ -29,12 +52,23 @@ module Deimos
     yield(config)
   end
 
-  def manager
-    @manager ||= Deimos::Manager.new
+  def middleware
+    @middleware ||= [Deimos::Logger] | config.middleware
   end
 
-  def add(*args, &block)
-    manager.add(*args, &block)
+  def applications
+    @applications ||= {
+      "/status" => Deimos::Endpoints::Status,
+      "/metrics" => Deimos::Endpoints::Metrics
+    }.merge(config.applications)
+  end
+
+  def status
+    @status ||= Deimos::Status::Manager.new
+  end
+
+  def metrics
+    @metrics ||= Deimos::Metrics::Manager.new
   end
 
   def logger

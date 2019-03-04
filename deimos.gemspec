@@ -23,6 +23,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency "sinatra"
   spec.add_dependency "sinatra-contrib"
   spec.add_dependency "huyegger"
+  spec.add_dependency "concurrent-ruby"
+  spec.add_dependency "phobos_prometheus"
 
   spec.add_development_dependency "bundler", "~> 1.16"
   spec.add_development_dependency "rake", "~> 10.0"
