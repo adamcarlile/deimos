@@ -26,7 +26,7 @@ module Deimos
     require 'deimos/endpoints/metrics'
     Thread.new do 
       ::Rack::Handler::WEBrick.run(application, {
-        BindAddress: Deimos.config.bind,
+        Host: Deimos.config.bind,
         Port: Deimos.config.port,
         Logger: Deimos.logger,
         AccessLog: []
