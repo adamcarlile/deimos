@@ -43,9 +43,6 @@ module Deimos
 
   def config
     @config ||= OpenStruct.new.tap do |x|
-      x.metrics ||= OpenStruct.new.tap do |m|
-        m.prefix = nil
-      end
       x.log_level    = ENV.fetch("LOG_LEVEL", ::Logger::INFO)
       x.port         = ENV.fetch("PORT", 5000)
       x.bind         = ENV.fetch("BIND_IP", "0.0.0.0")

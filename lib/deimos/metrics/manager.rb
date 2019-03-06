@@ -23,7 +23,7 @@ module Deimos
       end
 
       def subscribe(event_name, type:, label:, **kwargs, &block)
-        Deimos.logger.debug "Subscribed to #{event_name}..."
+        Deimos.logger.info "Metrics: Subscribed to #{event_name}..."
         subscriptions << ActiveSupport::Notifications.subscribe(event_name) do |*args|
           event = ActiveSupport::Notifications::Event.new(*args)
           collector = register_collector!(event_name, type, label, kwargs)

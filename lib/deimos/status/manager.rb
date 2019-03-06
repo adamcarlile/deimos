@@ -8,6 +8,8 @@ module Deimos
       end
 
       def add(name, &block)
+        Deimos.logger.info "Status: Reporting #{name} status..."
+
         checks[name] = block || Proc.new { true }
       end
 

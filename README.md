@@ -1,8 +1,10 @@
 # Deimos
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/deimos`. To experiment with that code, run `bin/console` for an interactive prompt.
+Deimos is an application designed to be run alongside Phobos, but can be run in any context to provide a unified status and metrics interface for kubernetes style applications.
 
-TODO: Delete this and the text above, and describe your gem
+## Name
+
+Deimos, brother of Phobos, from Greek mythology. The personification of dread and terror. Also it is the other natural Martian satelite, the first being Phobos
 
 ## Installation
 
@@ -22,7 +24,74 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Configuration
+
+```ruby
+Deimos.configure do |config|
+    config.log_level = ENV.fetch("LOG_LEVEL", ::Logger::INFO)
+    config.port      = ENV.fetch("PORT", 5000)
+    config.bind      = ENV.fetch("BIND_IP", "0.0.0.0")
+    # An application hash that allows you to add more rack apps
+    # Doesn't override the defaults, just merges
+    config.applications.merge('/path' => Rack::App.new)
+    # Allows you to inject more middlewares into the application
+    config.applications.middleware << Middleware
+end
+```
+
+### Status
+
+Deimos allows you to add as many status checks are you like, however the API expects a true or false response. Any false responses from the bound blocks will return an `internal_server_error`
+
+```ruby
+Deimos.status.add(:allocations) { AllocationService::Status.new.call }
+Deimos.status.add(:another_check) { true }
+```
+```json
+# GET /status
+{ "allocations":true, "another_check":true }
+```
+
+Status checks are run in parallel.
+
+
+### Metrics
+
+Deimos uses `ActiveSupport::Notification` and `Prometheus` under the hood. 
+
+#### Subscribing
+
+The subsription takes, three required arguments and a block.
+* The event name to subscribe to
+* The type of collector
+* The prometheus label
+
+It also takes any extra keyword arguments and passes them to the collector, allowing you to specify extra options for each type of collector
+
+* [Prometheus Collectors](https://github.com/prometheus/client_ruby#metrics)
+* [ActiveSupport Notifications](https://api.rubyonrails.org/classes/ActiveSupport/Notifications.html)
+
+```ruby
+Deimos.metrics.subscribe('event.name', type: :gauge, label: 'Label') do |event, collector|
+    collector.increment({}, event.payload[:value])
+    # event is an ActiveSupport::Notification::Event
+    # event.name      # => "render"
+    # event.duration  # => 10 (in milliseconds)
+    # event.payload   # => {some: :payload}
+
+    # collector is a Prometheus::Client::#{type.classify}
+  end
+```
+
+#### Instrumenting
+
+`Deimos.metrics.instrument` delegates directly to `ActiveSupport::Notifications.instrument`, please see the [ActiveSupport Notifications](https://api.rubyonrails.org/classes/ActiveSupport/Notifications.html) documentation for more information
+
+```ruby
+Deimos.metrics.instrument('product_count', value: 10 + i) do
+    # can wrap a block to give you code execution duration
+end
+```
 
 ## Development
 
@@ -32,7 +101,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/deimos.
+Bug reports and pull requests are welcome on GitHub at https://github.com/adamcarlile/deimos.
 
 ## License
 
