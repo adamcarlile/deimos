@@ -3,11 +3,8 @@ module Deimos
     class Metrics < Sinatra::Application
       disable :logging
       set :logger, Deimos.logger
-
-      get "/" do
-        content_type :json
-        { status: true } 
-      end
+      
+      use Prometheus::Middleware::Exporter, registry: Deimos.metrics.registry, path: ''
       
     end
   end

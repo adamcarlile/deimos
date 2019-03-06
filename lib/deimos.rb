@@ -1,12 +1,15 @@
 require 'rack'
 require 'huyegger'
 require 'sinatra'
+require 'active_support'
 require 'sinatra/contrib'
 require "sinatra/json"
 require 'webrick'
 require 'logger'
 require 'webrick'
 require 'concurrent-ruby'
+require 'prometheus/client'
+require 'prometheus/middleware/exporter'
 
 require "deimos/version"
 
@@ -40,6 +43,9 @@ module Deimos
 
   def config
     @config ||= OpenStruct.new.tap do |x|
+      x.metrics ||= OpenStruct.new.tap do |m|
+        m.prefix = nil
+      end
       x.log_level    = ENV.fetch("LOG_LEVEL", ::Logger::INFO)
       x.port         = ENV.fetch("PORT", 5000)
       x.bind         = ENV.fetch("BIND_IP", "0.0.0.0")
@@ -53,7 +59,7 @@ module Deimos
   end
 
   def middleware
-    @middleware ||= [Deimos::Logger] | config.middleware
+    @middleware ||= [Rack::Deflater, Deimos::Logger] | config.middleware
   end
 
   def applications
