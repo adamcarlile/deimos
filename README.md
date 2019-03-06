@@ -24,6 +24,12 @@ Or install it yourself as:
 
 ## Usage
 
+After the application is configured (see below), you can boot it by calling the following. Place this in an initializer at some point after the configuration directives.
+
+```ruby
+Deimos.boot! # Will execute a webrick HTTP handler in another thread
+```
+
 ### Configuration
 
 ```ruby
