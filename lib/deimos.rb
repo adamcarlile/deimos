@@ -2,7 +2,6 @@ require 'rack'
 require 'huyegger'
 require 'sinatra'
 require 'active_support'
-require 'sinatra/contrib'
 require "sinatra/json"
 require 'webrick'
 require 'logger'
