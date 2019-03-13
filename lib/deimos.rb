@@ -60,8 +60,8 @@ module Deimos
 
   def applications
     @applications ||= {
-      "/status" => Deimos::Endpoints::Status,
-      "/metrics" => Deimos::Endpoints::Metrics
+      "/status" => Deimos::Endpoints::Status.new(status: status),
+      "/metrics" => Deimos::Endpoints::Metrics.new(registry: registry)
     }.merge(config.applications)
   end
 
@@ -76,5 +76,5 @@ module Deimos
   def logger
     @logger ||= Huyegger::Logger.new(::Logger.new(STDOUT).tap {|x| x.level = config.log_level})
   end
-  
+
 end
