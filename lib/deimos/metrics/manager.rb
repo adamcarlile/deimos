@@ -9,17 +9,18 @@ module Deimos
       }
 
       delegate :instrument, to: ActiveSupport::Notifications
-    
+      
+      attr_reader :registry
+      def initialize(registry: Prometheus::Client.registry)
+        @registry = registry
+      end
+
       def subscriptions
         @subscriptions ||= []
       end
 
       def collectors
         @collectors ||= {}
-      end
-
-      def registry
-        @registry ||= Prometheus::Client.registry
       end
 
       def subscribe(event_name, type:, label:, **kwargs, &block)
@@ -38,7 +39,7 @@ module Deimos
       private
 
       def register_collector!(event_name, type, about, **kwargs)
-        return collectors[event_name] if collectors[event_name].present?
+        return collectors[event_name] if collectors[event_name]
         name = event_name.gsub(".", "_").to_sym
         collectors[event_name] = TYPES[type].new(name, about, kwargs).tap { |x| registry.register(x) }
       end
