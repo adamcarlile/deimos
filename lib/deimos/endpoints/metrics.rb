@@ -5,11 +5,11 @@ module Deimos
         @metrics = metrics
         super
       end
-
       disable :logging
       set :logger, Deimos.logger
 
       get "/*" do
+        content_type :text
         Prometheus::Client::Formats::Text.marshal(@metrics.registry)
       end
       

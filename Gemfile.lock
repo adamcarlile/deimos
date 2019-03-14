@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    deimos (0.2.5)
+    deimos (0.2.6)
       activesupport
       concurrent-ruby (~> 1.1.0)
       huyegger
