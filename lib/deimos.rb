@@ -21,8 +21,6 @@ module Deimos
   module_function
 
   def boot!
-    require 'deimos/endpoints/status'
-    require 'deimos/endpoints/metrics'
     Thread.new do 
       ::Rack::Handler::WEBrick.run(application, {
         Host: Deimos.config.bind,
@@ -59,6 +57,8 @@ module Deimos
   end
 
   def applications
+    require 'deimos/endpoints/status'
+    require 'deimos/endpoints/metrics'
     @applications ||= {
       "/status" => Deimos::Endpoints::Status.new(status: status),
       "/metrics" => Deimos::Endpoints::Metrics.new
