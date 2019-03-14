@@ -61,7 +61,7 @@ module Deimos
   def applications
     @applications ||= {
       "/status" => Deimos::Endpoints::Status.new(status: status),
-      "/metrics" => Deimos::Endpoints::Metrics.new(registry: registry)
+      "/metrics" => Deimos::Endpoints::Metrics.new
     }.merge(config.applications)
   end
 
