@@ -61,7 +61,7 @@ module Deimos
     require 'deimos/endpoints/metrics'
     @applications ||= {
       "/status" => Deimos::Endpoints::Status.new(status: status),
-      "/metrics" => Deimos::Endpoints::Metrics.new
+      "/metrics" => Deimos::Endpoints::Metrics.new(metrics: metrics)
     }.merge(config.applications)
   end
 

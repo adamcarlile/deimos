@@ -1,10 +1,17 @@
 module Deimos
   module Endpoints
     class Metrics < Sinatra::Application
+      def initialize(metrics:)
+        @metrics = metrics
+        super
+      end
+
       disable :logging
       set :logger, Deimos.logger
-      
-      use Prometheus::Middleware::Exporter, registry: Deimos.metrics.registry, path: ''
+
+      get "/*" do
+        Prometheus::Client::Formats::Text.marshal(@metrics.registry)
+      end
       
     end
   end

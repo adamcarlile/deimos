@@ -9,7 +9,7 @@ module Deimos
       disable :logging
       set :logger, Deimos.logger
 
-      get "/" do
+      get "/*" do
         status_runner = @status.run!
 
         content_type :json

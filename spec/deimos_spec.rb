@@ -15,8 +15,18 @@ RSpec.describe Deimos do
       it { expect(last_response).to be_ok }
     end
 
+    context "get /status/-/" do
+      before { get('/status/-/') }
+      it { expect(last_response).to be_ok }
+    end
+
     context "get /metrics" do
       before { get('/metrics') }
+      it { expect(last_response).to be_ok }
+    end
+
+    context "get /metrics/-/" do
+      before { get('/metrics/-/') }
       it { expect(last_response).to be_ok }
     end
   end
