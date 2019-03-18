@@ -32,7 +32,7 @@ module Deimos
   end
 
   def application
-    Rack::Builder.new do
+    @application ||= Rack::Builder.new do
       Deimos.middleware.each { |m| use m }
       run Rack::URLMap.new(Deimos.applications)
     end
@@ -57,8 +57,8 @@ module Deimos
   end
 
   def applications
-    require 'deimos/endpoints/status'
-    require 'deimos/endpoints/metrics'
+    load! unless loaded?
+    
     @applications ||= {
       "/status" => Deimos::Endpoints::Status.new(status: status),
       "/metrics" => Deimos::Endpoints::Metrics.new(metrics: metrics)
@@ -75,6 +75,16 @@ module Deimos
 
   def logger
     @logger ||= Huyegger::Logger.new(::Logger.new(STDOUT).tap {|x| x.level = config.log_level})
+  end
+
+  def load!
+    require 'deimos/endpoints/status'
+    require 'deimos/endpoints/metrics'
+    @loaded = true
+  end
+
+  def loaded?
+    @loaded
   end
 
 end

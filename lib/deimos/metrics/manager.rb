@@ -8,15 +8,11 @@ module Deimos
         summary: Prometheus::Client::Summary
       }
 
-      delegate :instrument, to: ActiveSupport::Notifications
+      delegate :instrument, :unsubscribe, to: ActiveSupport::Notifications
       
       attr_reader :registry
       def initialize(registry: Prometheus::Client.registry)
         @registry = registry
-      end
-
-      def subscriptions
-        @subscriptions ||= []
       end
 
       def collectors
@@ -25,7 +21,7 @@ module Deimos
 
       def subscribe(event_name, type:, label:, **kwargs, &block)
         Deimos.logger.info "Metrics: Subscribed to #{event_name}..."
-        subscriptions << ActiveSupport::Notifications.subscribe(event_name) do |*args|
+        ActiveSupport::Notifications.subscribe(event_name) do |*args|
           event = ActiveSupport::Notifications::Event.new(*args)
           collector = register_collector!(event_name, type, label, kwargs)
           if block_given?

@@ -2,7 +2,7 @@ module Deimos
   module Status
     class Runner
       def initialize(checks)
-        @checks = checks.dup
+        @checks = checks
       end
 
       def status

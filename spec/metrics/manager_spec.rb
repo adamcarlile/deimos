@@ -17,7 +17,8 @@ RSpec.describe 'Deimos::Metrics::Manager' do
       10.times { metrics.instrument(event, {}) }
     end
 
-    it { expect(metrics.subscriptions.first).to be_instance_of ActiveSupport::Notifications::Fanout::Subscribers::Timed }
+    after { metrics.unsubscribe(event) }
+
     context "Collector" do
       subject { metrics.collectors[event] }
 
