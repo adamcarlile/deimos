@@ -6,7 +6,7 @@ require "sinatra/json"
 require 'webrick'
 require 'logger'
 require 'webrick'
-require 'concurrent-ruby'
+require 'concurrent'
 require 'prometheus/client'
 require 'prometheus/middleware/exporter'
 
@@ -21,7 +21,7 @@ module Deimos
   module_function
 
   def boot!
-    Thread.new do 
+    Thread.new do
       ::Rack::Handler::WEBrick.run(application, {
         Host: Deimos.config.bind,
         Port: Deimos.config.port,
@@ -58,7 +58,7 @@ module Deimos
 
   def applications
     load! unless loaded?
-    
+
     @applications ||= {
       "/status" => Deimos::Endpoints::Status.new(status: status),
       "/metrics" => Deimos::Endpoints::Metrics.new(metrics: metrics)
